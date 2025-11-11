@@ -11,20 +11,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:messenger_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('Home page renders conversation list and search', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // AppBar title
+    expect(find.text('Messenger'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Search field
+    expect(find.byType(TextField), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // At least one mock conversation name present
+    expect(find.text('Alice Johnson'), findsOneWidget);
+
+    // Perform a search filtering results
+    await tester.enterText(find.byType(TextField), 'Design');
+    await tester.pumpAndSettle();
+    expect(find.text('Design Team'), findsOneWidget);
+    expect(find.text('Alice Johnson'), findsNothing);
   });
 }
