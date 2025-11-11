@@ -49,15 +49,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _openNewChat() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Open New Contact Selection (to be implemented)')),
-    );
+    Navigator.pushNamed(context, '/contacts');
   }
 
   void _openSettings() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Open Settings (to be implemented)')),
-    );
+    Navigator.pushNamed(context, '/settings');
   }
 
   @override
@@ -118,8 +114,10 @@ class _HomePageState extends State<HomePage> {
                         return ConversationTile(
                           conversation: c,
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Open chat with ${c.name} (to be implemented)')),
+                            Navigator.pushNamed(
+                              context,
+                              '/chat',
+                              arguments: {'id': c.id, 'name': c.name},
                             );
                           },
                         );
