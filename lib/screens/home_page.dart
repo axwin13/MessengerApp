@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/conversation.dart';
+import '../providers/chat_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,14 +12,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
-  final List<Conversation> _allConversations = _mockConversations;
-  late List<Conversation> _filtered;
   bool _isRefreshing = false;
 
   @override
   void initState() {
     super.initState();
-    _filtered = List.of(_allConversations);
     _searchController.addListener(_handleSearch);
   }
 
@@ -28,17 +28,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleSearch() {
-    final query = _searchController.text.trim().toLowerCase();
-    setState(() {
-      if (query.isEmpty) {
-        _filtered = List.of(_allConversations);
-      } else {
-        _filtered = _allConversations
-            .where((c) => c.name.toLowerCase().contains(query) ||
-                c.lastMessage.toLowerCase().contains(query))
-            .toList();
-      }
-    });
+    setState(() {}); // Rebuild to apply search filter
   }
 
   Future<void> _refresh() async {
@@ -89,7 +79,7 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refresh,
-              child: _filtered.isEmpty
+        child: _filteredList(context).isEmpty
                   ? ListView(
                       children: [
                         SizedBox(
@@ -107,10 +97,10 @@ class _HomePageState extends State<HomePage> {
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.only(bottom: 12),
-                      itemCount: _filtered.length,
+                      itemCount: _filteredList(context).length,
                       separatorBuilder: (_, __) => const Divider(height: 0),
                       itemBuilder: (context, index) {
-                        final c = _filtered[index];
+                        final c = _filteredList(context)[index];
                         return ConversationTile(
                           conversation: c,
                           onTap: () {
@@ -134,25 +124,19 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+  List<Conversation> _filteredList(BuildContext context) {
+    final provider = context.watch<ChatProvider>();
+    final conversations = provider.conversations;
+    final query = _searchController.text.trim().toLowerCase();
+    if (query.isEmpty) return conversations;
+    return conversations
+        .where((c) => c.name.toLowerCase().contains(query) ||
+            c.lastMessage.toLowerCase().contains(query))
+        .toList();
+  }
 }
 
-class Conversation {
-  final String id;
-  final String name;
-  final String lastMessage;
-  final DateTime lastTime;
-  final int unreadCount;
-  final String? avatarUrl; // if null, use initials
-
-  const Conversation({
-    required this.id,
-    required this.name,
-    required this.lastMessage,
-    required this.lastTime,
-    this.unreadCount = 0,
-    this.avatarUrl,
-  });
-}
+// Conversation model moved to lib/models/conversation.dart
 
 class ConversationTile extends StatelessWidget {
   final Conversation conversation;
@@ -265,42 +249,4 @@ class _Avatar extends StatelessWidget {
   }
 }
 
-// --- Mock data below ---
-
-final List<Conversation> _mockConversations = [
-  Conversation(
-    id: '1',
-    name: 'Alice Johnson',
-    lastMessage: 'See you soon! 👋',
-    lastTime: DateTime.now().subtract(const Duration(minutes: 5)),
-    unreadCount: 2,
-  ),
-  Conversation(
-    id: '2',
-    name: 'Bob Chen',
-    lastMessage: 'Sent a photo',
-    lastTime: DateTime.now().subtract(const Duration(minutes: 12)),
-    unreadCount: 0,
-  ),
-  Conversation(
-    id: '3',
-    name: 'Design Team',
-    lastMessage: 'Let’s finalize the color palette.',
-    lastTime: DateTime.now().subtract(const Duration(hours: 2)),
-    unreadCount: 5,
-  ),
-  Conversation(
-    id: '4',
-    name: 'Mom',
-    lastMessage: 'Dinner at 7?',
-    lastTime: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
-    unreadCount: 0,
-  ),
-  Conversation(
-    id: '5',
-    name: 'Project Group',
-    lastMessage: 'I pushed the latest changes to Git.',
-    lastTime: DateTime.now().subtract(const Duration(days: 3)),
-    unreadCount: 1,
-  ),
-];
+// Conversations are now provided by ChatProvider

@@ -5,12 +5,16 @@ import 'screens/contacts_page.dart';
 import 'screens/settings_page.dart';
 import 'screens/chat_page.dart';
 import 'providers/theme_provider.dart';
+import 'providers/chat_provider.dart';
+import 'providers/settings_provider.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+    ChangeNotifierProvider(create: (_) => ThemeProvider()),
+    ChangeNotifierProvider(create: (_) => ChatProvider()),
+    ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
       child: const MyApp(),
     ),
